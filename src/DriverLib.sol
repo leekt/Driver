@@ -25,9 +25,12 @@ library DriverLib {
         }
 
         impl = _toAddress(_registry.get(address(this), slot, hex""));
+        (bool notStatic,) = address(_checker).call{gas: 104}(hex"");
 
         if (impl != address(0)) {
-            _setTransient(slot, bytes32(bytes20(impl)));
+            if (notStatic) {
+                _setTransient(slot, bytes32(bytes20(impl)));
+            }
             return impl;
         }
 
@@ -37,8 +40,7 @@ library DriverLib {
         if (impl == address(0)) {
             revert ImplNotFound();
         }
-        (bool success,) = address(_checker).call{gas: 104}(hex"");
-        if (success) {
+        if (notStatic) {
             // checker.check does minimal tstore to check if this is static call or not
             _setTransient(IMPLEMENTATION_SLOT, bytes32(bytes20(impl)));
         }

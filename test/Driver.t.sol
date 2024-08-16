@@ -61,8 +61,14 @@ contract MockRegistry is IRegistry {
 }
 
 contract MockImpl {
+    uint256 public counter = 0;
+
     function hello() external view returns (string memory) {
         return "world";
+    }
+
+    function doSomething() external {
+        counter++;
     }
 }
 
@@ -70,11 +76,14 @@ contract DriverLibTest is Test {
     MockRegistry registry;
     MockImpl impl;
     StaticChecker checker;
+    address constant CREATE2_PROXY = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
     function setUp() public {
         registry = new MockRegistry();
         impl = new MockImpl();
-        checker = new StaticChecker();
+        (bool success, bytes memory ret) =
+            CREATE2_PROXY.call(abi.encodePacked(uint256(0), hex"60033d8160093d39f35f5f5d"));
+        checker = StaticChecker(address(bytes20(ret)));
     }
 
     function testSetGet() external {
@@ -90,5 +99,6 @@ contract DriverLibTest is Test {
             new Driver(registry, checker, abi.encodePacked(IMPLEMENTATION_SLOT, bytes32(bytes20(address(impl)))));
         MockImpl instance = MockImpl(address(driver));
         assertEq(instance.hello(), "world");
+        instance.doSomething();
     }
 }

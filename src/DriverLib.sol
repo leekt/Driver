@@ -37,10 +37,11 @@ library DriverLib {
         if (impl == address(0)) {
             revert ImplNotFound();
         }
-        try _checker.check() {
+        (bool success,) = address(_checker).call{gas: 104}(hex"");
+        if (success) {
             // checker.check does minimal tstore to check if this is static call or not
             _setTransient(IMPLEMENTATION_SLOT, bytes32(bytes20(impl)));
-        } catch {}
+        }
     }
 
     function _setTransient(bytes32 slot, bytes32 value) internal {

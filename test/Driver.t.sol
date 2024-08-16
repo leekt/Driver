@@ -11,13 +11,13 @@ import {Test} from "forge-std/Test.sol";
 contract MockRegistry is IRegistry {
     mapping(address => mapping(bytes32 => bytes32)) public slot;
 
-    function register(bytes calldata _initData) external {
+    function register(bytes calldata _initData) external payable {
         bytes32 initSlot = bytes32(_initData[0:32]);
         bytes32 initValue = bytes32(_initData[32:64]);
         slot[msg.sender][initSlot] = initValue;
     }
 
-    function updateState(bytes32 _state, bytes calldata _extra, Proof calldata _proof) external {
+    function updateState(bytes32 _state, bytes calldata _extra, Proof calldata _proof) external payable {
         // no-op
     }
 
@@ -25,12 +25,12 @@ contract MockRegistry is IRegistry {
         // no-op
     }
 
-    function set(bytes32 _slot, bytes32 _value, bytes calldata _extra, Proof calldata _proof) external {
+    function set(bytes32 _slot, bytes32 _value, bytes calldata _extra, Proof calldata _proof) external payable {
         slot[msg.sender][_slot] = _value;
     }
 
     // for setting the large value that cannot be stored within 32bytes
-    function set(bytes32 _slot, bytes calldata _value, bytes calldata _extra, Proof calldata _proof) external {
+    function set(bytes32 _slot, bytes calldata _value, bytes calldata _extra, Proof calldata _proof) external payable {
         slot[msg.sender][_slot] = bytes32(_value[0:32]);
     }
 
